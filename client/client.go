@@ -396,6 +396,11 @@ func (kc *kClient) invokeHandleEndpoint() (endpoint.Endpoint, error) {
 		return nil, err
 	}
 	return func(ctx context.Context, req, resp interface{}) (err error) {
+		defer func() {
+			if err != nil {
+				klog.CtxErrorf(ctx, "invoke handle got err=%v", err)
+			}
+		}()
 		var sendMsg remote.Message
 		var recvMsg remote.Message
 		defer func() {
