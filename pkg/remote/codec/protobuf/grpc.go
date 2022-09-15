@@ -21,6 +21,7 @@ import (
 	"encoding/binary"
 	"fmt"
 
+	"github.com/cloudwego/kitex/pkg/klog"
 	"google.golang.org/protobuf/proto"
 
 	"github.com/cloudwego/kitex/pkg/protocol/bprotoc"
@@ -89,14 +90,21 @@ func (c *grpcCodec) Encode(ctx context.Context, message remote.Message, out remo
 func (c *grpcCodec) Decode(ctx context.Context, message remote.Message, in remote.ByteBuffer) (err error) {
 	hdr, err := in.Next(5)
 	if err != nil {
+		klog.CtxErrorf(ctx, "#93 grpc decode err=%v", err)
 		return err
 	}
 	dLen := int(binary.BigEndian.Uint32(hdr[1:]))
 	d, err := in.Next(dLen)
 	if err != nil {
+		klog.CtxErrorf(ctx, "#100 grpc decode err=%v", err)
 		return err
 	}
 	data := message.Data()
+	defer func() {
+		if err != nil {
+			klog.CtxErrorf(ctx, "grpc decode err=%v, data type=%T", err, data)
+		}
+	}()
 	switch t := data.(type) {
 	case bprotoc.FastRead:
 		_, err = bprotoc.Binary.ReadMessage(d, bprotoc.SkipTypeCheck, t)

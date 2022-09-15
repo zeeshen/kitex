@@ -396,6 +396,11 @@ func (kc *kClient) invokeHandleEndpoint() (endpoint.Endpoint, error) {
 		return nil, err
 	}
 	return func(ctx context.Context, req, resp interface{}) (err error) {
+		defer func() {
+			if err != nil {
+				klog.CtxErrorf(ctx, "invoke handle got err=%v", err)
+			}
+		}()
 		var sendMsg remote.Message
 		var recvMsg remote.Message
 		defer func() {
@@ -409,6 +414,7 @@ func (kc *kClient) invokeHandleEndpoint() (endpoint.Endpoint, error) {
 
 		cli, err := remotecli.NewClient(ctx, ri, transPipl, kc.opt.RemoteOpt)
 		if err != nil {
+			klog.CtxErrorf(ctx, "invoke handle new client err=%v", err)
 			return
 		}
 
@@ -423,6 +429,7 @@ func (kc *kClient) invokeHandleEndpoint() (endpoint.Endpoint, error) {
 		sendMsg.SetProtocolInfo(remote.NewProtocolInfo(config.TransportProtocol(), kc.svcInfo.PayloadCodec))
 
 		if err = cli.Send(ctx, ri, sendMsg); err != nil {
+			klog.CtxErrorf(ctx, "invoke handle send message err=%v", err)
 			return
 		}
 		if m.OneWay() {
@@ -432,6 +439,9 @@ func (kc *kClient) invokeHandleEndpoint() (endpoint.Endpoint, error) {
 
 		recvMsg = remote.NewMessage(resp, kc.opt.RemoteOpt.SvcInfo, ri, remote.Reply, remote.Client)
 		err = cli.Recv(ctx, ri, recvMsg)
+		if err != nil {
+			klog.CtxErrorf(ctx, "invoke handle receive message err=%v", err)
+		}
 		return err
 	}, nil
 }

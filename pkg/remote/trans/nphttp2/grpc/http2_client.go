@@ -703,10 +703,13 @@ func (t *http2Client) handleData(f *http2.DataFrame) {
 		// TODO(bradfitz, zhaoq): A copy is required here because there is no
 		// guarantee f.Data() is consumed before the arrival of next frame.
 		// Can this copy be eliminated?
-		if len(f.Data()) > 0 {
+		if n := len(f.Data()); n > 0 {
 			buffer := t.bufferPool.get()
 			buffer.Reset()
 			buffer.Write(f.Data())
+			if n < 5 {
+				klog.Warnf("#711 data frame length %d less then 5", n)
+			}
 			s.write(recvMsg{buffer: buffer})
 		}
 	}

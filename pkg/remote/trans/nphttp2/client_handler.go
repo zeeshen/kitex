@@ -20,6 +20,7 @@ import (
 	"context"
 	"net"
 
+	"github.com/cloudwego/kitex/pkg/klog"
 	"github.com/cloudwego/kitex/pkg/remote"
 	"github.com/cloudwego/kitex/pkg/remote/codec/protobuf"
 	"github.com/cloudwego/kitex/pkg/remote/trans/nphttp2/metadata"
@@ -65,6 +66,9 @@ func (h *cliTransHandler) Read(ctx context.Context, conn net.Conn, msg remote.Me
 	defer buf.Release(err)
 
 	err = h.codec.Decode(ctx, msg, buf)
+	if err != nil {
+		klog.CtxErrorf(ctx, "read decode err=%v, codec type=%T", err, h.codec)
+	}
 	return
 }
 

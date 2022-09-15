@@ -33,6 +33,7 @@ import (
 	"sync"
 	"sync/atomic"
 
+	"github.com/cloudwego/kitex/pkg/klog"
 	"github.com/cloudwego/kitex/pkg/remote/trans/nphttp2/codes"
 	"github.com/cloudwego/kitex/pkg/remote/trans/nphttp2/metadata"
 	"github.com/cloudwego/kitex/pkg/remote/trans/nphttp2/status"
@@ -458,7 +459,11 @@ func (s *Stream) Read(p []byte) (n int, err error) {
 		return 0, er
 	}
 	s.requestRead(len(p))
-	return io.ReadFull(s.trReader, p)
+	n, err = io.ReadFull(s.trReader, p)
+	if err != nil {
+		klog.Errorf("stream read err=%v", err)
+	}
+	return
 }
 
 // StreamWrite only used for unit test
