@@ -25,6 +25,7 @@ import (
 	"net/url"
 	"time"
 
+	"github.com/cloudwego/kitex/pkg/klog"
 	"github.com/cloudwego/kitex/pkg/remote/trans/nphttp2/grpc"
 	"github.com/cloudwego/kitex/pkg/remote/trans/nphttp2/metadata"
 	"github.com/cloudwego/kitex/pkg/rpcinfo"
@@ -91,6 +92,9 @@ func (c *clientConn) Read(b []byte) (n int, err error) {
 		if statusErr := c.s.Status().Err(); statusErr != nil {
 			err = statusErr
 		}
+	}
+	if err != nil {
+		klog.Error("#97 read err=%v", err, c.s.Method())
 	}
 	return n, err
 }
