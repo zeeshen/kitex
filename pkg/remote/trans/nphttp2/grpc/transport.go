@@ -164,12 +164,12 @@ func (r *recvBufferReader) Read(p []byte) (n int, err error) {
 	if r.closeStream != nil {
 		n, r.err = r.readClient(p)
 		if r.err != nil {
-			klog.Error("#tranport.go:167 read client, closeStream=true, err=%v", r.err)
+			klog.Error("transport.go:#167 read client, closeStream=true, err=%v", r.err)
 		}
 	} else {
 		n, r.err = r.read(p)
 		if r.err != nil {
-			klog.Error("#tranport.go:172 read client, closeStream=false, err=%v", r.err)
+			klog.Error("transport.go:#172 read client, closeStream=false, err=%v", r.err)
 		}
 	}
 	return n, r.err
