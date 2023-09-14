@@ -22,6 +22,7 @@ import (
 	"encoding/binary"
 	"fmt"
 	"io"
+	"strings"
 
 	"github.com/cloudwego/kitex/pkg/remote/codec/protobuf/encoding"
 
@@ -65,7 +66,13 @@ func compress(ctx context.Context, data []byte) ([]byte, bool, error) {
 	if cname == "" {
 		return data, false, nil
 	}
-	compressor := encoding.GetCompressor(cname)
+	var compressor encoding.Compressor
+	for _, name := range strings.Split(cname, ",") {
+		compressor = encoding.GetCompressor(name)
+		if compressor != nil {
+			break
+		}
+	}
 	if compressor == nil {
 		return nil, false, fmt.Errorf("no compressor registered for: %s", cname)
 	}
